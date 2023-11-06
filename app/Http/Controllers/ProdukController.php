@@ -12,7 +12,12 @@ class ProdukController extends Controller
      */
     public function index()
     {
-        //
+        $dataPerPage = 2;
+        $data = Produk::orderBy('id')->simplePaginate($dataPerPage);
+        $no = 1;
+        $total = Produk::all()->count();
+        return view('index', compact('data', 'no', 'total', 'dataPerPage'));
+        // ->with(i,);
     }
 
     /**
@@ -20,7 +25,7 @@ class ProdukController extends Controller
      */
     public function create()
     {
-        //
+        return view('create');
     }
 
     /**
@@ -28,7 +33,19 @@ class ProdukController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nama_produk' => ['required', 'unique:produks,nama_produk'],
+            'harga' => ['required', 'integer'],
+            'jumlah' => ['required', 'integer'],
+            'keterangan' => ['required'],
+        ]);
+        Produk::create([
+            'nama_produk' => $request->nama_produk,
+            'harga' => $request->harga,
+            'jumlah' => $request->jumlah,
+            'keterangan' => $request->keterangan
+        ]);
+        return redirect()->route('produk.index')->with('success', 'Produk baru berhasil ditambahkan!');
     }
 
     /**
@@ -44,7 +61,7 @@ class ProdukController extends Controller
      */
     public function edit(Produk $produk)
     {
-        //
+        return view('update', compact('produk'));
     }
 
     /**
@@ -52,7 +69,19 @@ class ProdukController extends Controller
      */
     public function update(Request $request, Produk $produk)
     {
-        //
+        $request->validate([
+            'nama_produk' => ['required', ($request->nama_produk == $produk->nama_produk) ? '' :  'unique:produks,nama_produk'],
+            'harga' => ['required', 'integer'],
+            'jumlah' => ['required', 'integer'],
+            'keterangan' => ['required'],
+        ]);
+        $produk->update([
+            'nama_produk' => $request->nama_produk,
+            'harga' => $request->harga,
+            'jumlah' => $request->jumlah,
+            'keterangan' => $request->keterangan
+        ]);
+        return redirect()->route('produk.index')->with('success', 'Produk ' . $request->nama_produk . ' berhasil diubah!');
     }
 
     /**
@@ -60,6 +89,7 @@ class ProdukController extends Controller
      */
     public function destroy(Produk $produk)
     {
-        //
+        $produk->delete();
+        return redirect()->route('produk.index')->with('success', 'Produk ' . $produk->nama_produk . ' berhasil dihapus!');
     }
 }
